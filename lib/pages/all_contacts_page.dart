@@ -1,8 +1,12 @@
 import 'package:contact_app/custom_widgets/contact_view.dart';
 import 'package:contact_app/models/Contact.dart';
 import 'package:contact_app/provider/app_provider.dart';
+import 'package:contact_app/utils/helper_methods.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl_phone_number_input/intl_phone_number_input.dart';
+import 'package:intl_phone_number_input/intl_phone_number_input_test.dart';
 import 'package:provider/provider.dart';
 
 class AllContactsPage extends StatefulWidget {
@@ -23,6 +27,7 @@ class _AllContactsPageState extends State<AllContactsPage> {
   void initState() {
     super.initState();
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -131,15 +136,38 @@ class _AllContactsPageState extends State<AllContactsPage> {
                                 ),
                                 TextButton(
                                   onPressed: () {
-                                    print(emailController.text);
-                                    Provider.of<AppProvider>(context,
-                                            listen: false)
-                                        .addContact(
-                                            context,
-                                            nameController.text,
-                                            phoneNoController.text,
-                                            emailController.text);
-                                    context.pop();
+                                    String pattern =
+                                        r'^\s*(?:\+?(\d{1,3}))?[-. (]*(\d{3})[-. )]*(\d{3})[-. ]*(\d{4})(?: *x(\d+))?\s*$';
+                                    RegExp regExp = new RegExp(pattern);
+                                    if (!regExp
+                                        .hasMatch(phoneNoController.text)) {
+                                      showDialog(
+                                          context: context,
+                                          builder: (context) => AlertDialog(
+                                                title: Text(
+                                                    'Invalid Phone number!'),
+                                                actions: [
+                                                  TextButton(
+                                                    child: Text('OK',style: TextStyle(color: Colors.white),),
+                                                    style: TextButton.styleFrom(
+                                                      backgroundColor: Colors.blue
+                                                    ),
+                                                    onPressed: () {
+                                                      context.pop();
+                                                    },
+                                                  )
+                                                ],
+                                              ));
+                                    } else {
+                                      Provider.of<AppProvider>(context,
+                                              listen: false)
+                                          .addContact(
+                                              context,
+                                              nameController.text,
+                                              phoneNoController.text,
+                                              emailController.text);
+                                      context.pop();
+                                    }
                                   },
                                   style: TextButton.styleFrom(
                                       backgroundColor: Colors.blue,
@@ -169,7 +197,9 @@ class _AllContactsPageState extends State<AllContactsPage> {
             print(appProvider.allContacts);
             return ListView.builder(
               itemCount: appProvider.allContacts.length,
-              itemBuilder: (context,index) => ContactView(contact: appProvider.allContacts[index],),
+              itemBuilder: (context, index) => ContactView(
+                contact: appProvider.allContacts[index],
+              ),
             );
           },
         ));

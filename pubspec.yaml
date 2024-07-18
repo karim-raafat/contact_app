@@ -31,6 +31,7 @@ dependencies:
   http:
   provider:
   go_router:
+  intl_phone_number_input: ^0.7.4
   flutter:
     sdk: flutter
 
